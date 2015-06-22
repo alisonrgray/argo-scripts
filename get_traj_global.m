@@ -1,8 +1,9 @@
 % Function to download list of traj.nc and associated meta.nc files
-
+%
 % target = '/home/alison/Data/Argo Profiles/Float/Global/'
 % update = 0;
-
+% getlist_flag = set to 1 if need to download global traj index
+%
 % # Title : Trajectory directory file of the Argo global Data Assembly Center
 % # Description : The directory file describes all trajectory files of the argo GDAC ftp site.
 % # Project : ARGO
@@ -13,21 +14,30 @@
 % # GDAC node : CORIOLIS
 % # file,latitude_max,latitude_min,longitude_max,longitude_min,profiler_type,institution,date_update
 
-function [float_num,float_type] = get_traj_global(target,update)
+% 
+% See get_prof_global.m for a better commented version of this script (they
+% are almost identical)
+%
+
+function [float_num,float_type] = get_traj_global(target,update,getlist_flag)
 
 traj_file = 'ar_index_global_traj.txt';
-cd('/home/alison/Data/Argo Profiles/')
+cd('/home/Data/Argo_traj/')
 
 % ftp to coriolis site and download traj_file
-ff = ftp('ftp.ifremer.fr','anonymous','alison@ocean.washington.edu');
+ff = ftp('ftp.ifremer.fr','anonymous','hdrake@princeton.edu');
 cd(ff,'ifremer/argo')
 pasv(ff);
-% mget(ff,traj_file);
  
-% disp('Please check ar_index_global_traj.txt for NaN''s and text.  Put ''#'' in front of unnecessary lines.');
-% disp('Press any key to resume');
-% pause
- 
+if getlist_flag == 1
+    mget(ff,prof_file);
+    
+    disp('Please check ar_index_global_prof.txt for NaN''s and text.  Put ''#'' in front of unnecessary lines.');
+    disp('Please delete floats with float_types that are ''null'' in ar_index_global_prof.txt.') 
+    disp('Press any key to resume');
+    pause
+end
+
 fid = fopen(traj_file);
 C = textscan(fid,'%s %f %f %f %f %f %s %f','Delimiter',',','CommentStyle','#');
 
@@ -64,7 +74,7 @@ for i = 1:length(ind);
    
    if rem(i,5)==0
        close(ff);
-       ff = ftp('ftp.ifremer.fr','anonymous','alison@ocean.washington.edu');
+       ff = ftp('ftp.ifremer.fr','anonymous','hdrake@princeton.edu');
        cd(ff,'ifremer/argo')
        pasv(ff);
        cd(ff,'dac')

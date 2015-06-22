@@ -3,6 +3,8 @@
 %
 % INPUTS: 
 % target = directory name on local machine to download files to; 
+% ln = longitude range [west east];
+% lt = latitude range [south north];
 % update = download all files that have been updated since this date, in format yyyymmdd000000 (enter 0 for all files);
 % email = email address (for IFREMER login);
 % getlist_flag = set to 1 if need to download index file; 
@@ -14,7 +16,7 @@
 %%%%%%%%%%%%%%%%%%
 
 
-function [float_num,no_prof] = get_prof(target,update,email,getlist_flag,fsi_flag)
+function [float_num,no_prof] = get_prof(target,ln,lt,update,email,getlist_flag,fsi_flag)
 
 
 prof_file = 'ar_index_global_prof.txt';
@@ -57,6 +59,7 @@ fclose(fid);
 clear C fid
 
 % convert longtitude to 360 scale
+if ln(1) >= 180 || ln(2) >= 180
 ind = find(lon < 0);
 lon(ind) = lon(ind) + 360;
 end
@@ -73,10 +76,10 @@ clear float_type
 
 % Probably don't need this
 % find floats in given latitude/longitude range
-%ind = find(lat <= lt(2) & lat >= lt(1) & (lon <= ln(2) & lon >= ln(1)));
-%filelist = filelist(ind);
-%date_update = date_update(ind);
-%clear lat lon
+ind = find(lat <= lt(2) & lat >= lt(1) & (lon <= ln(2) & lon >= ln(1)));
+filelist = filelist(ind);
+date_update = date_update(ind);
+clear lat lon
 
 % find floats that need to be updated
 filelist = filelist(date_update >= update);
@@ -88,9 +91,6 @@ cd(target)
 % make a list of distinct floats
 j = 1;
 float_num = NaN(size(filelist));
-
-print float_num
-
 for i = 1:length(filelist)
     C = textscan(char(filelist(i)),'%s %f %s %s','Delimiter','/');
     if i == 1
@@ -105,7 +105,6 @@ for i = 1:length(filelist)
     end
 end
 float_num = float_num(~isnan(float_num));
-print float_num(1:5)
 
 % display number of floats
 disp(length(float_num))
@@ -119,7 +118,7 @@ for i = 1:length(float_num);
     d = dir(ff,strcat('/ifremer/argo/dac/',char(dac(i)),'/',num2str(float_num(i))));
     D = struct2cell(d); D = D(1,:);
     if sum(strcmp(D,strcat(num2str(float_num(i)),'_prof.nc')))
-        %mget(ff,strcat(num2str(float_num(i)),'_prof.nc'))
+        mget(ff,strcat(num2str(float_num(i)),'_prof.nc'))
     else
         no_prof(k) = float_num(i); %#ok<AGROW>
         k = k+1;
