@@ -1,3 +1,6 @@
+
+% Add to these empty arrays if you want to add to the list of 
+% illegal lat/lon squares
 illegal_lats_min = [];
 illegal_lats_max = [];
 illegal_lons_min = [];
@@ -35,8 +38,10 @@ plotm(latitude,longitude,'.');
 geoshow('landareas.shp','FaceColor',[.9 .9 .9])
 setm(gca, 'grid','on','meridianlabel','on','parallellabel','on','plinelocation',10,'mlinelocation',10,'plabellocation',10,'mlabellocation',10)
 axis tight
-[lat1,lon1]=inputm(1)
-[lat2,lon2]=inputm(1)
+[lat1,lon1]=inputm(1);
+[lat2,lon2]=inputm(1);
+disp(strcat('Latitude interval: (',num2str(lat1),',',num2str(lat2),') and Longitude interval: (',num2str(lon1),',',num2str(lon2),')'))
+disp('If you want to make a square illegal, click the bottom left corner first and the top right corner next.')
 if ~(isempty(lat1) || isempty(lat2) || isempty (lon1) || isempty (lon2))
     illegal_lats_min = horzcat(illegal_lats_min,lat1);
     illegal_lats_max = horzcat(illegal_lats_max,lat2);
