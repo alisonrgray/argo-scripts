@@ -55,9 +55,9 @@ C = textscan(fid,'%s %f %f %f %s %f %s %f','Delimiter',',','CommentStyle','#');
 % String of file names
 filelist = C{1,1};
 
-% Floating points for lats and lons
-lat = C{1,3};
-lon = C{1,4};
+% Floating points for lats and lons - not needed for global data set
+% lat = C{1,3};
+% lon = C{1,4};
 
 % What is C{1,5}?
 
@@ -72,27 +72,13 @@ date_update = C{1,8};
 fclose(fid);
 clear C fid
 
-% Convert longtitude to 360 scale
-ind = find(lon < 0);
-lon(ind) = lon(ind) + 360;
-end
-
 % Remove provor, fsi sensor floats
 if fsi_flag == 1
     ind = find(~(float_type == 840 | (float_type == 841 | (float_type == 842 | (float_type == 847 | (float_type == 852 | float_type == 857))))));
     filelist = filelist(ind);
-    lat = lat(ind);
-    lon = lon(ind);
     date_update = date_update(ind);
 end
 clear float_type
-
-%Find floats in given latitude/longitude range (not needed if doing global
-%data download).
-%ind = find(lat <= lt(2) & lat >= lt(1) & (lon <= ln(2) & lon >= ln(1)));
-%filelist = filelist(ind);
-%date_update = date_update(ind);
-%clear lat lon
 
 % Find floats that need to be updated. Not needed if downloading for the
 % first time.
