@@ -5,6 +5,7 @@ function [temp,pres,psal,lon,lat,juld,type] = read_prof(filename)
 
 % open netcdf file & get number of variables
 nc = netcdf.open(char(filename),'NC_NOWRITE');
+% disp(netcdf.inq(nc))
 [~,nvars] = netcdf.inq(nc);
 
 % check to see if psal, temp, and pres are variables of this file
@@ -23,27 +24,28 @@ end
 
 % load variables
 if sflag
-    psal = ncvar(nc,'PSAL');
+    psal = ncread(filename,'PSAL');
 else
     psal = [];
 end
 
 if tflag
-    temp = ncvar(nc,'TEMP');
+    temp = ncread(filename,'TEMP');
 else
     temp = [];
 end
 
 if pflag
-    pres = ncvar(nc,'PRES');
+    pres = ncread(filename,'PRES');
 else
     pres = [];
 end
 
-juld = ncvar(nc,'JULD');    
-lat = ncvar(nc,'LATITUDE'); 
-lon = ncvar(nc,'LONGITUDE');
+juld = ncread(filename,'JULD');    
+lat = ncread(filename,'LATITUDE'); 
+lon = ncread(filename,'LONGITUDE');
 
+% What does this do?
 varid = netcdf.inqVarID(nc,'WMO_INST_TYPE');
 type = str2num(char(cellstr((netcdf.getVar(nc,varid))')));  %#ok<ST2NM>
 
@@ -61,5 +63,5 @@ end
 
 netcdf.close(nc);
 
-clear nc reference_date_time dayref varid
+clear nc reference_date_time dayref varid;
 return

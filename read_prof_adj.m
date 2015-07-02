@@ -23,32 +23,32 @@ end
 
 % load variables
 if sflag
-    psal = ncvar(nc,'PSAL_ADJUSTED');
-    psalerr = ncvar(nc,'PSAL_ADJUSTED_ERROR');
+    psal = ncread(filename,'PSAL_ADJUSTED');
+    psalerr = ncread(filename,'PSAL_ADJUSTED_ERROR');
 else
     psal = [];
     psalerr = [];
 end
 
 if tflag
-    temp = ncvar(nc,'TEMP_ADJUSTED');
-    temperr = ncvar(nc,'TEMP_ADJUSTED_ERROR');
+    temp = ncread(filename,'TEMP_ADJUSTED');
+    temperr = ncread(filename,'TEMP_ADJUSTED_ERROR');
 else
     temp = [];
     temperr = [];
 end
 
 if pflag
-    pres = ncvar(nc,'PRES_ADJUSTED');
-    preserr = ncvar(nc,'PRES_ADJUSTED_ERROR');
+    pres = ncread(filename,'PRES_ADJUSTED');
+    preserr = ncread(filename,'PRES_ADJUSTED_ERROR');
 else
     pres = [];
     preserr = [];
 end
 
-datamode = ncchar(nc,'DATA_MODE');
+datamode = ncread(filename,'DATA_MODE');
 
-juld = ncvar(nc,'JULD');    
+juld = ncread(filename,'JULD');    
 
 % reference date
 varid = netcdf.inqVarID(nc,'REFERENCE_DATE_TIME');

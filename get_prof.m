@@ -1,16 +1,10 @@
 %%%%%%%%%%%%%%%%%%
 % Function to download list of prof.nc and associated files
 %
-% # Title : Trajectory directory file of the Argo global Data Assembly Center
-% # Description : The directory file describes all trajectory files of the argo GDAC ftp site.
-% # Project : ARGO
-% # Format version : 2.0
-% # FTP root number 1 : ftp://ftp.ifremer.fr/ifremer/argo/dac
-% # GDAC node : CORIOLIS
-% # file,latitude_max,latitude_min,longitude_max,longitude_min,profiler_type,institution,date_update
-%
 % INPUTS: 
 % target = directory name on local machine to download files to; 
+% ln = longitude range [west east];
+% lt = latitude range [south north];
 % update = download all files that have been updated since this date, in format yyyymmdd000000 (enter 0 for all files);
 % email = email address (for IFREMER login);
 % getlist_flag = set to 1 if need to download index file; 
@@ -22,27 +16,19 @@
 %%%%%%%%%%%%%%%%%%
 
 
-function [float_num,no_prof] = get_prof_global(target,update,email,getlist_flag,fsi_flag)
+function [float_num,no_prof] = get_prof(target,ln,lt,update,email,getlist_flag,fsi_flag)
 
-% Name of the file that is an index of all the floats
+
 prof_file = 'ar_index_global_prof.txt';
 
 % ftp to coriolis site and download prof_file
 ff = ftp('ftp.ifremer.fr','anonymous',email);
 cd(ff,'ifremer/argo')
-
-% For some reason, need to be in passive mode (google matlab ftp passive if
-% unsure)
 pasv(ff);
 
-% Downloads the index file if flagged.
 if getlist_flag == 1
     mget(ff,prof_file);
     
-    % The first non-commented line will probably be text, explaining what
-    % each column is. Need to comment this out. Also, search text for other
-    % signs of text. I found 3 or 4 profiles has 'null' for their type.
-    % Comment those lines out.
     disp('Please check ar_index_global_prof.txt for NaN''s and text.  Put ''#'' in front of unnecessary lines.');
     disp('Press any key to resume');
     pause
@@ -72,12 +58,13 @@ date_update = C{1,8};
 fclose(fid);
 clear C fid
 
-% Convert longtitude to 360 scale
+% convert longtitude to 360 scale
+if ln(1) >= 180 || ln(2) >= 180
 ind = find(lon < 0);
 lon(ind) = lon(ind) + 360;
 end
 
-% Remove provor, fsi sensor floats
+% remove provor, fsi sensor floats
 if fsi_flag == 1
     ind = find(~(float_type == 840 | (float_type == 841 | (float_type == 842 | (float_type == 847 | (float_type == 852 | float_type == 857))))));
     filelist = filelist(ind);
@@ -87,25 +74,23 @@ if fsi_flag == 1
 end
 clear float_type
 
-%Find floats in given latitude/longitude range (not needed if doing global
-%data download).
-%ind = find(lat <= lt(2) & lat >= lt(1) & (lon <= ln(2) & lon >= ln(1)));
-%filelist = filelist(ind);
-%date_update = date_update(ind);
-%clear lat lon
+% Probably don't need this
+% find floats in given latitude/longitude range
+ind = find(lat <= lt(2) & lat >= lt(1) & (lon <= ln(2) & lon >= ln(1)));
+filelist = filelist(ind);
+date_update = date_update(ind);
+clear lat lon
 
-% Find floats that need to be updated. Not needed if downloading for the
-% first time.
+% find floats that need to be updated
 filelist = filelist(date_update >= update);
 clear date_update ind
 
-% Directory to download to.
+% directory to download to.
 cd(target)
 
-% Make a list of distinct floats
+% make a list of distinct floats
 j = 1;
 float_num = NaN(size(filelist));
-
 for i = 1:length(filelist)
     C = textscan(char(filelist(i)),'%s %f %s %s','Delimiter','/');
     if i == 1
@@ -127,6 +112,7 @@ disp(length(float_num))
 % download _prof.nc file for each float
 cd(ff,'dac')
 k = 1;
+
 for i = 1:length(float_num);
     cd(ff,strcat(char(dac(i)),'/',num2str(float_num(i))));
     d = dir(ff,strcat('/ifremer/argo/dac/',char(dac(i)),'/',num2str(float_num(i))));
